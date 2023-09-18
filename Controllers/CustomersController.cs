@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Tmm.Data;
 using Tmm.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace Tmm.Controllers
 {
@@ -16,53 +16,51 @@ namespace Tmm.Controllers
 
         public CustomersController(TmmDbContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        // GET: api/customers
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers()
+        public async Task<ActionResult<IEnumerable<Customer>>> GetAllCustomers()
         {
             return await _context.Customers.Include(c => c.Addresses).ToListAsync();
         }
 
-        // GET: api/customers/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Customer>> GetCustomer(int id)
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Customer>> GetCustomerById(int id)
         {
             var customer = await _context.Customers.Include(c => c.Addresses).FirstOrDefaultAsync(c => c.Id == id);
-
             if (customer == null)
             {
                 return NotFound();
             }
-
             return customer;
         }
 
-        // POST: api/customers
         [HttpPost]
-        public async Task<ActionResult<Customer>> PostCustomer(Customer customer)
+        public async Task<ActionResult<Customer>> CreateCustomer([FromBody] Customer customer)
         {
+            if (customer == null)
+            {
+                return BadRequest("Customer object is null");
+            }
+
             _context.Customers.Add(customer);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetCustomer), new { id = customer.Id }, customer);
+            return CreatedAtAction(nameof(GetCustomerById), new { id = customer.Id }, customer);
         }
 
-        [HttpPost("add")]
-        public async Task<ActionResult<Customer>> AddCustomer(Customer customer)
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> UpdateCustomer(int id, [FromBody] Customer customer)
         {
-            return await PostCustomer(customer);
-        }
+            if (customer == null)
+            {
+                return BadRequest("Customer object is null");
+            }
 
-        // PUT: api/customers/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCustomer(int id, Customer customer)
-        {
             if (id != customer.Id)
             {
-                return BadRequest();
+                return BadRequest("Customer ID mismatch");
             }
 
             _context.Entry(customer).State = EntityState.Modified;
@@ -86,25 +84,19 @@ namespace Tmm.Controllers
             return NoContent();
         }
 
-        [HttpPut("update/{id}")]
-        public async Task<IActionResult> UpdateCustomer(int id, Customer customer)
-        {
-            return await PutCustomer(id, customer);
-        }
-
         [HttpGet("active")]
         public async Task<ActionResult<IEnumerable<Customer>>> GetActiveCustomers()
         {
             var activeCustomers = await _context.Customers
-                                      .Where(c => c.IsActive) 
+                                      .Where(c => c.IsActive)
                                       .Include(c => c.Addresses)
                                       .ToListAsync();
 
             return activeCustomers;
         }
 
-        [HttpPut("deactivate/{id}")]
-        public async Task<IActionResult> MarkAsInactive(int id)
+        [HttpPut("deactivate/{id:int}")]
+        public async Task<IActionResult> DeactivateCustomer(int id)
         {
             var customer = await _context.Customers.FindAsync(id);
             if (customer == null)
@@ -112,15 +104,14 @@ namespace Tmm.Controllers
                 return NotFound();
             }
 
-            customer.IsActive = false; 
+            customer.IsActive = false;
             _context.Entry(customer).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
-            return Ok(customer); 
+            return Ok(customer);
         }
 
-        // DELETE: api/customers/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
             var customer = await _context.Customers.Include(c => c.Addresses).FirstOrDefaultAsync(c => c.Id == id);

@@ -44,7 +44,7 @@ namespace Tmm.Tests
         [Fact]
         public async Task GetCustomers_ShouldReturnAllCustomers()
         {
-            var result = await _controller.GetCustomers();
+            var result = await _controller.GetAllCustomers();
             Assert.NotNull(result.Value);
             Assert.Equal(2, result.Value.Count());
         }
@@ -52,7 +52,7 @@ namespace Tmm.Tests
         [Fact]
         public async Task GetCustomer_WithValidId_ShouldReturnCorrectCustomer()
         {
-            var result = await _controller.GetCustomer(1);
+            var result = await _controller.GetCustomerById(1);
             var actionResult = Assert.IsType<ActionResult<Customer>>(result);
             var customer = Assert.IsType<Customer>(actionResult.Value);
             Assert.Equal("John", customer.Forename);
@@ -61,7 +61,7 @@ namespace Tmm.Tests
         [Fact]
         public async Task GetCustomer_WithInvalidId_ShouldReturnNotFound()
         {
-            var result = await _controller.GetCustomer(99);
+            var result = await _controller.GetCustomerById(99);
             Assert.IsType<NotFoundResult>(result.Result);
         }
 
@@ -69,7 +69,7 @@ namespace Tmm.Tests
         public async Task AddCustomer_ValidInput_ShouldReturnCreatedCustomer()
         {
             var newCustomer = new Customer { Id = 3, Title = "Dr", Forename = "Sam", Surname = "Brown", EmailAddress = "sam.brown@example.com", MobileNo = "1122334455" };
-            var result = await _controller.AddCustomer(newCustomer);
+            var result = await _controller.CreateCustomer(newCustomer);
 
             var actionResult = Assert.IsType<CreatedAtActionResult>(result.Result);
             var customer = Assert.IsType<Customer>(actionResult.Value);
@@ -141,7 +141,7 @@ namespace Tmm.Tests
         [Fact]
         public async Task MarkCustomerAsInactive_WithValidId_ShouldSetIsActiveToFalse()
         {
-            var result = await _controller.MarkAsInactive(1);
+            var result = await _controller.DeactivateCustomer(1);
             var updatedEntity = _context.Customers.Find(1);
             Assert.False(updatedEntity.IsActive);
         }
@@ -149,7 +149,7 @@ namespace Tmm.Tests
         [Fact]
         public async Task MarkCustomerAsInactive_WithInvalidId_ShouldReturnNotFound()
         {
-            var result = await _controller.MarkAsInactive(99);
+            var result = await _controller.DeactivateCustomer(99);
             Assert.IsType<NotFoundResult>(result);
         }
 
