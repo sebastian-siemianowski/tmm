@@ -44,11 +44,6 @@ namespace Tmm.Controllers
         [HttpPost]
         public async Task<ActionResult<Customer>> PostCustomer(Customer customer)
         {
-            if (customer.Addresses.Count == 0)
-            {
-                return BadRequest("A customer must have at least one address.");
-            }
-
             _context.Customers.Add(customer);
             await _context.SaveChangesAsync();
 
@@ -68,11 +63,6 @@ namespace Tmm.Controllers
             if (id != customer.Id)
             {
                 return BadRequest();
-            }
-
-            if (customer.Addresses.Count == 0)
-            {
-                return BadRequest("A customer must have at least one address.");
             }
 
             _context.Entry(customer).State = EntityState.Modified;
