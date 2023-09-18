@@ -100,7 +100,7 @@ namespace Tmm.Controllers
                                       .Include(c => c.Addresses)
                                       .ToListAsync();
 
-            return Ok(activeCustomers);
+            return activeCustomers;
         }
 
         [HttpPut("deactivate/{id}")]

@@ -147,9 +147,10 @@ namespace Tmm.Tests
 
       var controller = new CustomersController(_context);
       var result = await controller.GetActiveCustomers();
+      var response = result.Value;
 
-      Assert.Single(result.Value);
-      Assert.Equal("John", result.Value.First().Forename);
+      Assert.Single(response);
+      Assert.Equal("John", response.First().Forename);
     }
 
     [Fact]
