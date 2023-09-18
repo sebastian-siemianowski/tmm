@@ -55,6 +55,12 @@ namespace Tmm.Controllers
             return CreatedAtAction(nameof(GetCustomer), new { id = customer.Id }, customer);
         }
 
+        [HttpPost("add")]
+        public async Task<ActionResult<Customer>> AddCustomer(Customer customer)
+        {
+            return await PostCustomer(customer);
+        }
+
         // PUT: api/customers/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCustomer(int id, Customer customer)
@@ -88,6 +94,39 @@ namespace Tmm.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> UpdateCustomer(int id, Customer customer)
+        {
+            return await PutCustomer(id, customer);
+        }
+
+        [HttpGet("active")]
+        public async Task<ActionResult<IEnumerable<Customer>>> GetActiveCustomers()
+        {
+            var activeCustomers = await _context.Customers
+                                      .Where(c => c.IsActive) 
+                                      .Include(c => c.Addresses)
+                                      .ToListAsync();
+
+            return Ok(activeCustomers);
+        }
+
+        [HttpPut("deactivate/{id}")]
+        public async Task<IActionResult> MarkAsInactive(int id)
+        {
+            var customer = await _context.Customers.FindAsync(id);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            customer.IsActive = false; 
+            _context.Entry(customer).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return Ok(customer); 
         }
 
         // DELETE: api/customers/5

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/sebastiansiemianowski/microsoft_projects/tmm/Tmm.csproj": {}
+    "/Users/sebastiansiemianowski/microsoft_projects/tmm/Tests/Tests.csproj": {}
   },
   "projects": {
-    "/Users/sebastiansiemianowski/microsoft_projects/tmm/Tmm.csproj": {
+    "/Users/sebastiansiemianowski/microsoft_projects/tmm/Tests/Tests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/sebastiansiemianowski/microsoft_projects/tmm/Tmm.csproj",
-        "projectName": "Tmm",
-        "projectPath": "/Users/sebastiansiemianowski/microsoft_projects/tmm/Tmm.csproj",
+        "projectUniqueName": "/Users/sebastiansiemianowski/microsoft_projects/tmm/Tests/Tests.csproj",
+        "projectName": "Tests",
+        "projectPath": "/Users/sebastiansiemianowski/microsoft_projects/tmm/Tests/Tests.csproj",
         "packagesPath": "/Users/sebastiansiemianowski/.nuget/packages/",
-        "outputPath": "/Users/sebastiansiemianowski/microsoft_projects/tmm/obj/",
+        "outputPath": "/Users/sebastiansiemianowski/microsoft_projects/tmm/Tests/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/sebastiansiemianowski/.nuget/NuGet/NuGet.Config"
@@ -39,57 +39,25 @@
         "net7.0": {
           "targetAlias": "net7.0",
           "dependencies": {
-            "Microsoft.AspNetCore.OpenApi": {
-              "target": "Package",
-              "version": "[7.0.11, )"
-            },
-            "Microsoft.EntityFrameworkCore": {
-              "target": "Package",
-              "version": "[7.0.11, )"
-            },
-            "Microsoft.EntityFrameworkCore.Design": {
-              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
-              "suppressParent": "All",
-              "target": "Package",
-              "version": "[7.0.11, )"
-            },
-            "Microsoft.EntityFrameworkCore.InMemory": {
-              "target": "Package",
-              "version": "[7.0.11, )"
-            },
-            "Microsoft.EntityFrameworkCore.SqlServer": {
-              "target": "Package",
-              "version": "[7.0.11, )"
-            },
             "Microsoft.NET.Test.Sdk": {
               "target": "Package",
               "version": "[17.7.1, )"
             },
-            "Moq.EntityFrameworkCore": {
+            "coverlet.collector": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
               "target": "Package",
-              "version": "[7.0.0.2, )"
-            },
-            "Newtonsoft.Json": {
-              "target": "Package",
-              "version": "[13.0.1, )"
-            },
-            "NuGet.Frameworks": {
-              "target": "Package",
-              "version": "[6.5.0, )"
-            },
-            "Swashbuckle.AspNetCore": {
-              "target": "Package",
-              "version": "[6.5.0, )"
+              "version": "[3.2.0, )"
             },
             "xunit": {
               "target": "Package",
-              "version": "[2.5.1, )"
+              "version": "[2.4.2, )"
             },
             "xunit.runner.visualstudio": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
-              "version": "[2.5.1, )"
+              "version": "[2.4.5, )"
             }
           },
           "imports": [
@@ -104,9 +72,6 @@
           "assetTargetFallback": true,
           "warn": true,
           "frameworkReferences": {
-            "Microsoft.AspNetCore.App": {
-              "privateAssets": "none"
-            },
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
