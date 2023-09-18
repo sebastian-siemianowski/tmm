@@ -19,26 +19,32 @@ namespace Tmm.Tests
 
         public CustomersControllerTests()
         {
+            _context = CreateInMemoryDbContext();
+            _controller = new CustomersController(_context);
+            _mockCustomers = GenerateMockCustomers();
+
+            SeedDatabase(_mockCustomers);
+        }
+
+        private TmmDbContext CreateInMemoryDbContext()
+        {
             var options = new DbContextOptionsBuilder<TmmDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
-            _context = new TmmDbContext(options);
-            _controller = CreateControllerInstance(_context);
-
-            _mockCustomers = new List<Customer>
-            {
-                new Customer { Id = 1, Title = "Mr", Forename = "John", Surname = "Doe", EmailAddress = "john.doe@example.com", MobileNo = "1234567890" },
-                new Customer { Id = 2, Title = "Ms", Forename = "Jane", Surname = "Smith", EmailAddress = "jane.smith@example.com", MobileNo = "0987654321" }
-            };
-
-            _context.Customers.AddRange(_mockCustomers);
-            _context.SaveChanges();
+            return new TmmDbContext(options);
         }
 
-        private CustomersController CreateControllerInstance(TmmDbContext context)
+        private List<Customer> GenerateMockCustomers() => new List<Customer>
         {
-            return new CustomersController(context);
+            new Customer { Id = 1, Title = "Mr", Forename = "John", Surname = "Doe", EmailAddress = "john.doe@example.com", MobileNo = "1234567890" },
+            new Customer { Id = 2, Title = "Ms", Forename = "Jane", Surname = "Smith", EmailAddress = "jane.smith@example.com", MobileNo = "0987654321" }
+        };
+
+        private void SeedDatabase(List<Customer> customers)
+        {
+            _context.Customers.AddRange(customers);
+            _context.SaveChanges();
         }
 
         [Fact]
@@ -66,7 +72,7 @@ namespace Tmm.Tests
         }
 
         [Fact]
-        public async Task AddCustomer_ValidInput_ShouldReturnCreatedCustomer()
+        public async Task AddCustomer_ShouldAddAndReturnNewCustomer_GivenValidInput()
         {
             var newCustomer = new Customer { Id = 3, Title = "Dr", Forename = "Sam", Surname = "Brown", EmailAddress = "sam.brown@example.com", MobileNo = "1122334455" };
             var result = await _controller.CreateCustomer(newCustomer);
@@ -92,8 +98,10 @@ namespace Tmm.Tests
         }
 
         [Fact]
-        public async Task UpdateCustomer_WithValidId_ShouldUpdateDetails()
+        public async Task UpdateCustomer_ShouldUpdateCustomerDetails_GivenValidId()
         {
+            DetachAllEntities();
+
             var updatedCustomer = new Customer
             {
                 Id = 1,
@@ -103,11 +111,6 @@ namespace Tmm.Tests
                 EmailAddress = "john.dawson@example.com",
                 MobileNo = "1234567899"
             };
-
-            foreach (var entity in _context.ChangeTracker.Entries())
-            {
-                entity.State = EntityState.Detached;
-            }
 
             var result = await _controller.UpdateCustomer(1, updatedCustomer);
             var updatedEntity = _context.Customers.Find(1);
@@ -153,10 +156,33 @@ namespace Tmm.Tests
             Assert.IsType<NotFoundResult>(result);
         }
 
+        private void DetachAllEntities()
+        {
+            foreach (var entity in _context.ChangeTracker.Entries())
+            {
+                entity.State = EntityState.Detached;
+            }
+        }
+
         public void Dispose()
         {
-            _context.Database.EnsureDeleted();
+            ClearDatabase();
             _context.Dispose();
+        }
+
+        private void ClearDatabase()
+        {
+            foreach (var entity in _context.ChangeTracker.Entries<Customer>())
+            {
+                entity.State = EntityState.Detached;
+            }
+
+            foreach (var entity in _context.Customers)
+            {
+                _context.Customers.Remove(entity);
+            }
+
+            _context.SaveChanges();
         }
     }
 }
