@@ -20,6 +20,7 @@ namespace Tmm.Controllers
         }
 
         [HttpGet]
+        [Route("")]
         public async Task<ActionResult<IEnumerable<Address>>> GetAddressesForCustomer(int customerId)
         {
             if (!await _context.Customers.AnyAsync(c => c.Id == customerId))
@@ -30,7 +31,8 @@ namespace Tmm.Controllers
             return await _context.Addresses.Where(a => a.CustomerId == customerId).ToListAsync();
         }
 
-        [HttpGet("{id}")]
+        [HttpGet]
+        [Route("{id}")]
         public async Task<ActionResult<Address>> GetAddressForCustomer(int customerId, int id)
         {
             var address = await _context.Addresses.FirstOrDefaultAsync(a => a.Id == id && a.CustomerId == customerId);
@@ -42,8 +44,14 @@ namespace Tmm.Controllers
         }
 
         [HttpPost]
+        [Route("")]
         public async Task<ActionResult<Address>> AddAddressForCustomer(int customerId, Address address)
         {
+            if (address == null)
+            {
+                return BadRequest("Address cannot be null.");
+            }
+
             var customer = await _context.Customers.FindAsync(customerId);
             if (customer == null)
             {
@@ -57,12 +65,13 @@ namespace Tmm.Controllers
             return CreatedAtAction(nameof(GetAddressForCustomer), new { customerId, id = address.Id }, address);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut]
+        [Route("{id}")]
         public async Task<IActionResult> UpdateAddressForCustomer(int customerId, int id, Address address)
         {
             if (id != address.Id || customerId != address.CustomerId)
             {
-                return BadRequest();
+                return BadRequest("Mismatched address or customer IDs.");
             }
 
             var existingAddress = _context.Addresses.Local.SingleOrDefault(a => a.Id == id);
@@ -92,7 +101,8 @@ namespace Tmm.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete]
+        [Route("{id}")]
         public async Task<IActionResult> DeleteAddressForCustomer(int customerId, int id)
         {
             var address = await _context.Addresses.FirstOrDefaultAsync(a => a.Id == id && a.CustomerId == customerId);
