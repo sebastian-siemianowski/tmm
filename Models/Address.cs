@@ -23,14 +23,14 @@ namespace Tmm.Models
         public string Town { get; set; }
 
         [MaxLength(50)]
-        public string County { get; set; }
+        public string? County { get; set; }
 
         [Required]
         [MaxLength(10)]
         public string Postcode { get; set; }
 
         [MaxLength(50)]
-        public string Country { get; set; } = "UK"; // Default to UK if not provided
+        public string? Country { get; set; } = "UK"; // Default to UK if not provided
 
         public bool IsMain { get; set; } // To denote if it's the main address
 
