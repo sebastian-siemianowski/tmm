@@ -6,7 +6,7 @@ namespace Tmm.Data
     public class TmmDbContext : DbContext
     {
         public TmmDbContext(DbContextOptions<TmmDbContext> options) : base(options) { }
-        
+
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Address> Addresses { get; set; }
 
@@ -19,6 +19,10 @@ namespace Tmm.Data
                 .WithOne(a => a.Customer)
                 .HasForeignKey(a => a.CustomerId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Customer>()
+                .HasIndex(c => c.EmailAddress)
+                .IsUnique();
         }
     }
 }

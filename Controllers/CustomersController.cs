@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -47,6 +48,12 @@ namespace Tmm.Controllers
                 return BadRequest("Customer object is null.");
             }
 
+            // Check if email already exists
+            if (await _context.Customers.AnyAsync(c => c.EmailAddress == customer.EmailAddress))
+            {
+                return Conflict("A customer with the provided email address already exists.");
+            }
+
             _context.Customers.Add(customer);
             await _context.SaveChangesAsync();
 
@@ -65,6 +72,12 @@ namespace Tmm.Controllers
             if (id != customer.Id)
             {
                 return BadRequest("Customer ID mismatch.");
+            }
+
+            // Check if email already exists for a different customer
+            if (await _context.Customers.AnyAsync(c => c.EmailAddress == customer.EmailAddress && c.Id != id))
+            {
+                return Conflict("Another customer with the provided email address already exists.");
             }
 
             _context.Entry(customer).State = EntityState.Modified;
