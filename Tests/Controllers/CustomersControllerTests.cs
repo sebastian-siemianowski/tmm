@@ -68,7 +68,7 @@ namespace Tmm.Tests
         public async Task GetCustomer_WithInvalidId_ShouldReturnNotFound()
         {
             var result = await _controller.GetCustomerById(99);
-            Assert.IsType<NotFoundResult>(result.Result);
+            Assert.IsType<NotFoundObjectResult>(result.Result);
         }
 
         [Fact]
@@ -94,7 +94,7 @@ namespace Tmm.Tests
         public async Task DeleteCustomer_WithInvalidId_ShouldReturnNotFound()
         {
             var result = await _controller.DeleteCustomer(99);
-            Assert.IsType<NotFoundResult>(result);
+            Assert.IsType<NotFoundObjectResult>(result);
         }
 
         [Fact]
@@ -124,7 +124,7 @@ namespace Tmm.Tests
         {
             var updatedCustomer = new Customer { Id = 99, Title = "Mr", Forename = "Invalid", Surname = "User", EmailAddress = "invalid.user@example.com", MobileNo = "9999999999" };
             var result = await _controller.UpdateCustomer(99, updatedCustomer);
-            Assert.IsType<NotFoundResult>(result);
+            Assert.IsType<NotFoundObjectResult>(result);
         }
 
         [Fact]
@@ -153,7 +153,7 @@ namespace Tmm.Tests
         public async Task MarkCustomerAsInactive_WithInvalidId_ShouldReturnNotFound()
         {
             var result = await _controller.DeactivateCustomer(99);
-            Assert.IsType<NotFoundResult>(result);
+            Assert.IsType<NotFoundObjectResult>(result);
         }
 
         private void DetachAllEntities()

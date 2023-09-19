@@ -16,7 +16,7 @@ namespace Tmm.Models
         public string AddressLine1 { get; set; }
 
         [MaxLength(80)]
-        public string AddressLine2 { get; set; }
+        public string? AddressLine2 { get; set; }
 
         [Required]
         [MaxLength(50)]

@@ -20,28 +20,31 @@ namespace Tmm.Controllers
         }
 
         [HttpGet]
+        [Route("")]
         public async Task<ActionResult<IEnumerable<Customer>>> GetAllCustomers()
         {
             return await _context.Customers.Include(c => c.Addresses).ToListAsync();
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet]
+        [Route("{id:int}")]
         public async Task<ActionResult<Customer>> GetCustomerById(int id)
         {
             var customer = await _context.Customers.Include(c => c.Addresses).FirstOrDefaultAsync(c => c.Id == id);
             if (customer == null)
             {
-                return NotFound();
+                return NotFound("Customer not found.");
             }
             return customer;
         }
 
         [HttpPost]
+        [Route("")]
         public async Task<ActionResult<Customer>> CreateCustomer([FromBody] Customer customer)
         {
             if (customer == null)
             {
-                return BadRequest("Customer object is null");
+                return BadRequest("Customer object is null.");
             }
 
             _context.Customers.Add(customer);
@@ -50,17 +53,18 @@ namespace Tmm.Controllers
             return CreatedAtAction(nameof(GetCustomerById), new { id = customer.Id }, customer);
         }
 
-        [HttpPut("{id:int}")]
+        [HttpPut]
+        [Route("{id:int}")]
         public async Task<IActionResult> UpdateCustomer(int id, [FromBody] Customer customer)
         {
             if (customer == null)
             {
-                return BadRequest("Customer object is null");
+                return BadRequest("Customer object is null.");
             }
 
             if (id != customer.Id)
             {
-                return BadRequest("Customer ID mismatch");
+                return BadRequest("Customer ID mismatch.");
             }
 
             _context.Entry(customer).State = EntityState.Modified;
@@ -73,7 +77,7 @@ namespace Tmm.Controllers
             {
                 if (!CustomerExists(id))
                 {
-                    return NotFound();
+                    return NotFound("Customer not found.");
                 }
                 else
                 {
@@ -84,7 +88,8 @@ namespace Tmm.Controllers
             return NoContent();
         }
 
-        [HttpGet("active")]
+        [HttpGet]
+        [Route("active")]
         public async Task<ActionResult<IEnumerable<Customer>>> GetActiveCustomers()
         {
             var activeCustomers = await _context.Customers
@@ -95,13 +100,14 @@ namespace Tmm.Controllers
             return activeCustomers;
         }
 
-        [HttpPut("deactivate/{id:int}")]
+        [HttpPut]
+        [Route("deactivate/{id:int}")]
         public async Task<IActionResult> DeactivateCustomer(int id)
         {
             var customer = await _context.Customers.FindAsync(id);
             if (customer == null)
             {
-                return NotFound();
+                return NotFound("Customer not found.");
             }
 
             customer.IsActive = false;
@@ -111,13 +117,14 @@ namespace Tmm.Controllers
             return Ok(customer);
         }
 
-        [HttpDelete("{id:int}")]
+        [HttpDelete]
+        [Route("{id:int}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
             var customer = await _context.Customers.Include(c => c.Addresses).FirstOrDefaultAsync(c => c.Id == id);
             if (customer == null)
             {
-                return NotFound();
+                return NotFound("Customer not found.");
             }
 
             _context.Customers.Remove(customer);
