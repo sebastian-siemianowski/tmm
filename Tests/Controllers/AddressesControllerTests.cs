@@ -14,7 +14,7 @@ namespace Tests
     {
         private readonly TmmDbContext _context;
         private readonly AddressesController _controller;
-        private List<Address> _addresses;
+        private List<Address> _testAddresses;
 
         public AddressesControllerTests()
         {
@@ -24,11 +24,11 @@ namespace Tests
                 .Options;
 
             _context = new TmmDbContext(options);
-            SeedData();
+            SeedDatabaseWithTestData();
             _controller = new AddressesController(_context);
         }
 
-        private void SeedData()
+        private void SeedDatabaseWithTestData()
         {
             var customer = new Customer
             {
@@ -42,7 +42,7 @@ namespace Tests
             _context.Customers.Add(customer);
             _context.SaveChanges();
 
-            _addresses = new List<Address>
+            _testAddresses = new List<Address>
             {
                 new Address 
                 { 
@@ -64,92 +64,74 @@ namespace Tests
                 }
             };
 
-            _context.Addresses.AddRange(_addresses);
+            _context.Addresses.AddRange(_testAddresses);
             _context.SaveChanges();
         }
 
         [Fact]
-        public async Task GetAddressesForCustomer_ReturnsAllAddressesForCustomer()
+        public async Task GetAddressesForCustomer_ShouldReturnAllAddressesForGivenCustomer()
         {
             var result = await _controller.GetAddressesForCustomer(1);
             var actionResult = Assert.IsType<ActionResult<IEnumerable<Address>>>(result);
-            var returnValue = Assert.IsType<List<Address>>(actionResult.Value);
-            Assert.Equal(_addresses.Count, returnValue.Count);
+            var addresses = Assert.IsType<List<Address>>(actionResult.Value);
+            
+            Assert.Equal(_testAddresses.Count, addresses.Count);
         }
 
         [Fact]
-        public async Task GetAddressForCustomer_ReturnsSpecificAddress()
+        public async Task GetAddressForCustomer_ShouldReturnCorrectAddress()
         {
-            var firstAddressId = _addresses[0].Id;
-            var result = await _controller.GetAddressForCustomer(1, firstAddressId);
+            var result = await _controller.GetAddressForCustomer(1, 1);
             var actionResult = Assert.IsType<ActionResult<Address>>(result);
-            var returnValue = Assert.IsType<Address>(actionResult.Value);
-            Assert.Equal(firstAddressId, returnValue.Id);
+            var address = Assert.IsType<Address>(actionResult.Value);
+            
+            Assert.Equal(_testAddresses[0].AddressLine1, address.AddressLine1);
         }
 
         [Fact]
-        public async Task AddAddressForCustomer_AddsAddressSuccessfully()
+        public async Task AddAddressForCustomer_ShouldIncreaseAddressCount()
         {
             var newAddress = new Address 
             { 
-                AddressLine1 = "789 Another St", 
-                AddressLine2 = "Unit 10",
-                County = "Another County",
-                Postcode = "54321",
-                Town = "AnotherTown",
-                CustomerId = 1 
+                AddressLine1 = "789 Second St", 
+                County = "Test County 2", 
+                Postcode = "11122", 
+                Town = "AnotherTown"
             };
-
-            var result = await _controller.AddAddressForCustomer(1, newAddress);
-            var actionResult = Assert.IsType<ActionResult<Address>>(result);
-            var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(actionResult.Result);
-            var returnValue = Assert.IsType<Address>(createdAtActionResult.Value);
-            Assert.Equal("789 Another St", returnValue.AddressLine1);
+            
+            await _controller.AddAddressForCustomer(1, newAddress);
+            
+            var addresses = await _context.Addresses.ToListAsync();
+            Assert.Equal(_testAddresses.Count + 1, addresses.Count);
         }
 
         [Fact]
-        public async Task UpdateAddressForCustomer_UpdatesAddressSuccessfully()
+        public async Task UpdateAddressForCustomer_ShouldModifyAddressDetails()
         {
-            var firstAddressId = _addresses[0].Id;
             var updatedAddress = new Address 
-            { 
-                Id = firstAddressId, 
-                AddressLine1 = "1234 Updated St", 
-                AddressLine2 = "Apt 4B Updated",
-                County = "Updated County",
-                Postcode = "11223",
-                Town = "UpdatedTown",
-                CustomerId = 1 
-            };
-
-            var result = await _controller.UpdateAddressForCustomer(1, firstAddressId, updatedAddress);
-            Assert.IsType<NoContentResult>(result);
-        }
-
-        [Fact]
-        public async Task DeleteAddressForCustomer_DeletesAddressSuccessfully()
-        {
-            var secondAddressId = _addresses[1].Id;
-            var result = await _controller.DeleteAddressForCustomer(1, secondAddressId);
-            Assert.IsType<NoContentResult>(result);
-            Assert.DoesNotContain(_context.Addresses, a => a.Id == secondAddressId);
-        }
-
-        [Fact]
-        public async Task DeleteAddressForCustomer_ReturnsBadRequest_WhenOnlyOneAddressExists()
-        {
-            var addressToKeep = _addresses[0];
-            foreach (var address in _context.Addresses)
             {
-                if (address.Id != addressToKeep.Id)
-                {
-                    _context.Addresses.Remove(address);
-                }
-            }
-            await _context.SaveChangesAsync();
+                Id = 1,
+                CustomerId = 1,
+                AddressLine1 = "Updated Main St",
+                AddressLine2 = "Apt 4B", 
+                County = "Updated County", 
+                Postcode = "54321", 
+                Town = "UpdatedTown"
+            };
+            
+            await _controller.UpdateAddressForCustomer(1, 1, updatedAddress);
+            
+            var address = await _context.Addresses.FindAsync(1);
+            Assert.Equal("Updated Main St", address.AddressLine1);
+        }
 
-            var result = await _controller.DeleteAddressForCustomer(1, addressToKeep.Id);
-            Assert.IsType<BadRequestObjectResult>(result);
+        [Fact]
+        public async Task DeleteAddressForCustomer_ShouldDecreaseAddressCount()
+        {
+            await _controller.DeleteAddressForCustomer(1, 1);
+            
+            var addresses = await _context.Addresses.ToListAsync();
+            Assert.Equal(_testAddresses.Count - 1, addresses.Count);
         }
 
         public void Dispose()

@@ -16,20 +16,18 @@ namespace Tmm.Controllers
 
         public AddressesController(TmmDbContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Address>>> GetAddressesForCustomer(int customerId)
         {
-            var customer = await _context.Customers.FindAsync(customerId);
-            if (customer == null)
+            if (!await _context.Customers.AnyAsync(c => c.Id == customerId))
             {
                 return NotFound("Customer not found.");
             }
 
-            var addresses = await _context.Addresses.Where(a => a.CustomerId == customerId).ToListAsync();
-            return addresses;
+            return await _context.Addresses.Where(a => a.CustomerId == customerId).ToListAsync();
         }
 
         [HttpGet("{id}")]
@@ -38,7 +36,7 @@ namespace Tmm.Controllers
             var address = await _context.Addresses.FirstOrDefaultAsync(a => a.Id == id && a.CustomerId == customerId);
             if (address == null)
             {
-                return NotFound();
+                return NotFound("Address not found.");
             }
             return address;
         }
@@ -55,6 +53,7 @@ namespace Tmm.Controllers
             address.CustomerId = customerId;
             _context.Addresses.Add(address);
             await _context.SaveChangesAsync();
+            
             return CreatedAtAction(nameof(GetAddressForCustomer), new { customerId, id = address.Id }, address);
         }
 
