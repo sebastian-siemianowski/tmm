@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -58,10 +59,22 @@ namespace Tmm.Controllers
                 return NotFound("Customer not found.");
             }
 
+            if (address.IsMain)
+            {
+                var existingMainAddress = await _context.Addresses
+                                               .Where(a => a.CustomerId == customerId && a.IsMain)
+                                               .FirstOrDefaultAsync();
+                if (existingMainAddress != null)
+                {
+                    existingMainAddress.IsMain = false;
+                    _context.Entry(existingMainAddress).State = EntityState.Modified;
+                }
+            }
+
             address.CustomerId = customerId;
             _context.Addresses.Add(address);
             await _context.SaveChangesAsync();
-            
+
             return CreatedAtAction(nameof(GetAddressForCustomer), new { customerId, id = address.Id }, address);
         }
 
@@ -78,6 +91,18 @@ namespace Tmm.Controllers
             if (existingAddress != null)
             {
                 _context.Entry(existingAddress).State = EntityState.Detached;
+            }
+
+            if (address.IsMain)
+            {
+                var existingMainAddress = await _context.Addresses
+                                               .Where(a => a.CustomerId == customerId && a.IsMain && a.Id != id)
+                                               .FirstOrDefaultAsync();
+                if (existingMainAddress != null)
+                {
+                    existingMainAddress.IsMain = false;
+                    _context.Entry(existingMainAddress).State = EntityState.Modified;
+                }
             }
 
             _context.Entry(address).State = EntityState.Modified;
