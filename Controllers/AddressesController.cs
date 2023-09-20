@@ -82,7 +82,7 @@ namespace Tmm.Controllers
         [Route("{id}")]
         public async Task<IActionResult> UpdateAddressForCustomer(int customerId, int id, Address address)
         {
-            if (customerId != address.CustomerId)
+            if (id != address.Id || customerId != address.CustomerId)
             {
                 return BadRequest("Mismatched address or customer IDs.");
             }

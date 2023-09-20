@@ -161,3 +161,4 @@
 /Users/sebastiansiemianowski/microsoft_projects/tmm/obj/Debug/net7.0/Tmm.pdb
 /Users/sebastiansiemianowski/microsoft_projects/tmm/obj/Debug/net7.0/Tmm.genruntimeconfig.cache
 /Users/sebastiansiemianowski/microsoft_projects/tmm/obj/Debug/net7.0/ref/Tmm.dll
+/Users/sebastiansiemianowski/microsoft_projects/tmm/bin/Debug/net7.0/Postman/Tmm API.postman_collection.json
