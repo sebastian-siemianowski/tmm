@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Tmm.Models
 {
@@ -34,7 +35,9 @@ namespace Tmm.Models
 
         public bool IsMain { get; set; } // To denote if it's the main address
 
-        // Navigation property
-        public Customer Customer { get; set; }
+        // // Navigation property
+        [JsonIgnore]
+        public Customer? Customer { get; set; }
+
     }
 }

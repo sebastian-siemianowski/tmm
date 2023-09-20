@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Tmm.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Text.Json.Serialization;
 
 namespace Tmm
 {
@@ -19,18 +20,21 @@ namespace Tmm
             services.AddDbContext<TmmDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
+            services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+            });
+
             services.AddControllers();
         }
 
-        // This is the method you are missing
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TmmDbContext dbContext)
         {
+
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                ClearDatabase(dbContext);
             }
-
-            app.UseHttpsRedirection();
 
             app.UseRouting();
 
@@ -40,6 +44,14 @@ namespace Tmm
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private void ClearDatabase(TmmDbContext dbContext)
+        {
+            // Note the order here is important because of foreign key constraints
+            dbContext.Addresses.RemoveRange(dbContext.Addresses.ToList()); // Convert to list to immediately execute the query
+            dbContext.Customers.RemoveRange(dbContext.Customers.ToList()); // Convert to list to immediately execute the query
+            dbContext.SaveChanges();
         }
     }
 }

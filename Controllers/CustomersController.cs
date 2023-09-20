@@ -54,12 +54,12 @@ namespace Tmm.Controllers
                 return Conflict("A customer with the provided email address already exists.");
             }
 
-            if (customer.Addresses != null)
+            if (customer.Addresses != null && customer.Addresses.Any())
             {
-                // Explicitly attach addresses to the context
                 foreach (var address in customer.Addresses)
                 {
-                    _context.Entry(address).State = EntityState.Added;
+                    address.Customer = customer;
+                    address.CustomerId = customer.Id; // Not strictly necessary as EF should handle it
                 }
             }
 
