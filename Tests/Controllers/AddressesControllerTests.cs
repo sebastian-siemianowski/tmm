@@ -68,7 +68,7 @@ namespace Tests
             _context.Addresses.AddRange(_testAddresses);
             _context.SaveChanges();
         }
-
+        // Tests if all addresses for a given customer can be successfully retrieved.
         [Fact]
         public async Task GetAddressesForCustomer_ShouldReturnAllAddressesForGivenCustomer()
         {
@@ -79,6 +79,7 @@ namespace Tests
             Assert.Equal(_testAddresses.Count, addresses.Count);
         }
 
+        // Tests if requesting addresses for a non-existent customer returns a 'Not Found' result.
         [Fact]
         public async Task GetAddressesForCustomer_ShouldReturnNotFoundForNonExistentCustomer()
         {
@@ -86,6 +87,7 @@ namespace Tests
             Assert.IsType<NotFoundObjectResult>(result.Result);
         }
 
+        // Tests if the method correctly retrieves a single address for a given customer.
         [Fact]
         public async Task GetAddressForCustomer_ShouldReturnCorrectAddress()
         {
@@ -96,6 +98,7 @@ namespace Tests
             Assert.Equal(_testAddresses[0].AddressLine1, address.AddressLine1);
         }
 
+        // Tests if requesting a non-existent address for a given customer returns a 'Not Found' result.
         [Fact]
         public async Task GetAddressForCustomer_ShouldReturnNotFoundForNonExistentAddress()
         {
@@ -103,6 +106,7 @@ namespace Tests
             Assert.IsType<NotFoundObjectResult>(result.Result);
         }
 
+        // Tests if adding a new address for a customer successfully increases the total address count.
         [Fact]
         public async Task AddAddressForCustomer_ShouldIncreaseAddressCount()
         {
@@ -120,6 +124,7 @@ namespace Tests
             Assert.Equal(_testAddresses.Count + 1, addresses.Count);
         }
 
+        // Tests if adding a null address for a customer returns a 'Bad Request' result.
         [Fact]
         public async Task AddAddressForCustomer_ShouldReturnBadRequestForNullAddress()
         {
@@ -128,6 +133,7 @@ namespace Tests
             Assert.Equal("Address cannot be null.", badRequestResult.Value);
         }
 
+        // Tests if trying to add an address for a non-existent customer returns a 'Not Found' result.
         [Fact]
         public async Task AddAddressForCustomer_ShouldReturnNotFoundForNonExistentCustomer()
         {
@@ -142,6 +148,7 @@ namespace Tests
             Assert.IsType<NotFoundObjectResult>(result.Result);
         }
 
+        // Tests if updating an address for a customer successfully modifies the address details.
         [Fact]
         public async Task UpdateAddressForCustomer_ShouldModifyAddressDetails()
         {
@@ -162,6 +169,7 @@ namespace Tests
             Assert.Equal("Updated Main St", address.AddressLine1);
         }
 
+        // Tests if updating an address with mismatched address ID or customer ID returns a 'Bad Request' result.
         [Fact]
         public async Task UpdateAddressForCustomer_ShouldReturnBadRequestForMismatchedIds()
         {
@@ -176,6 +184,7 @@ namespace Tests
             Assert.Equal("Mismatched address or customer IDs.", badRequestResult.Value);
         }
 
+        // Tests if deleting an address for a customer successfully decreases the total address count.
         [Fact]
         public async Task DeleteAddressForCustomer_ShouldDecreaseAddressCount()
         {
@@ -185,16 +194,18 @@ namespace Tests
             Assert.Equal(_testAddresses.Count - 1, addresses.Count);
         }
 
+        // Tests if trying to delete the last address of a customer (leaving them with no addresses) is prevented.
         [Fact]
-        public async Task DeleteAddressForCustomer_ShouldReturnBadRequestWhenLastAddress()
+        public async Task DeleteAddressForCustomer_ShouldPreventDeletingLastAddress()
         {
-            await _controller.DeleteAddressForCustomer(1, 2);
-            var result = await _controller.DeleteAddressForCustomer(1, 1);
+            await _controller.DeleteAddressForCustomer(1, 1);
+            var result = await _controller.DeleteAddressForCustomer(1, 2);
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
             Assert.Equal("A customer must have at least one address.", badRequestResult.Value);
         }
 
         [Fact]
+        // Ensures a new main address for a customer unsets any existing main address.
         public async Task AddAddressForCustomer_WhenAddingMainAddress_ShouldUnsetExistingMainAddress()
         {
             var newMainAddress = new Address
@@ -213,6 +224,7 @@ namespace Tests
         }
 
         [Fact]
+        // Ensures updating an address to main unsets any existing main address for the customer.
         public async Task UpdateAddressForCustomer_WhenUpdatingToMainAddress_ShouldUnsetExistingMainAddress()
         {
             var updatedMainAddress = new Address
@@ -228,6 +240,7 @@ namespace Tests
             Assert.Single(addresses.Where(a => a.IsMain));
         }
 
+        // Cleans up and deletes the in-memory database after tests run.
         public void Dispose()
         {
             _context.Database.EnsureDeleted();
