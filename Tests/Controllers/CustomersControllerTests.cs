@@ -89,6 +89,62 @@ namespace Tmm.Tests
             Assert.Equal("Sam", customer.Forename);
         }
 
+        [Fact]
+        public async Task AddCustomer_WithAddresses_ShouldAddAndReturnNewCustomerWithAddresses_GivenValidInput()
+        {
+            // Arrange
+            var newCustomer = new Customer
+            {
+                Id = 3,
+                Title = "Dr",
+                Forename = "Sam",
+                Surname = "Brown",
+                EmailAddress = "sam.brown@example.com",
+                MobileNo = "1122334455",
+                Addresses = new List<Address>
+        {
+            new Address
+            {
+                AddressLine1 = "123 Main St",
+                Town = "TestCity",
+                Postcode = "12345",
+                Country = "UK",
+                IsMain = true
+            },
+            new Address
+            {
+                AddressLine1 = "456 Other St",
+                Town = "TestCity2",
+                Postcode = "67890",
+                Country = "UK",
+                IsMain = false
+            }
+        }
+            };
+
+            // Act
+            var result = await _controller.CreateCustomer(newCustomer);
+
+            // Assert
+            var actionResult = Assert.IsType<CreatedAtActionResult>(result.Result);
+            var customer = Assert.IsType<Customer>(actionResult.Value);
+
+            Assert.True("Sam" == customer.Forename, "Expected forename did not match.");
+            Assert.True("Brown" == customer.Surname, "Expected surname did not match.");
+            Assert.True("sam.brown@example.com" == customer.EmailAddress, "Expected email did not match.");
+            Assert.True(2 == customer.Addresses.Count, "Number of addresses did not match expected count.");
+
+            var mainAddress = customer.Addresses.First(a => a.IsMain);
+            Assert.True("123 Main St" == mainAddress.AddressLine1, "Main address line did not match.");
+            Assert.True("TestCity" == mainAddress.Town, "Main address town did not match.");
+            Assert.True("12345" == mainAddress.Postcode, "Main address postcode did not match.");
+
+            var secondaryAddress = customer.Addresses.First(a => !a.IsMain);
+            Assert.True("456 Other St" == secondaryAddress.AddressLine1, "Secondary address line did not match.");
+            Assert.True("TestCity2" == secondaryAddress.Town, "Secondary address town did not match.");
+            Assert.True("67890" == secondaryAddress.Postcode, "Secondary address postcode did not match.");
+        }
+
         // Tests if a customer can be deleted given a valid ID.
         [Fact]
         public async Task DeleteCustomer_WithValidId_ShouldRemoveCustomer()
@@ -192,7 +248,7 @@ namespace Tmm.Tests
             foreach (var entity in _context.Customers)
             {
                 _context.Customers.Remove(entity);
-}
+            }
 
             _context.SaveChanges();
         }
