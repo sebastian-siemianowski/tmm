@@ -87,17 +87,28 @@ namespace Tmm.Controllers
                 return BadRequest("Mismatched address or customer IDs.");
             }
 
-            var existingAddress = _context.Addresses.Local.SingleOrDefault(a => a.Id == id);
-            if (existingAddress != null)
+            // Fetch the address entity from the database.
+            var existingAddress = await _context.Addresses.SingleOrDefaultAsync(a => a.Id == id);
+            if (existingAddress == null)
             {
-                _context.Entry(existingAddress).State = EntityState.Detached;
+                return NotFound("Address not found.");
             }
+
+            // Update the properties of the fetched address with values from the provided address.
+            existingAddress.AddressLine1 = address.AddressLine1;
+            existingAddress.AddressLine2 = address.AddressLine2;
+            existingAddress.Town = address.Town;
+            existingAddress.County = address.County;
+            existingAddress.Postcode = address.Postcode;
+            existingAddress.Country = address.Country;
+            existingAddress.IsMain = address.IsMain;
+            // ... continue this for all other properties of the Address entity ...
 
             if (address.IsMain)
             {
                 var existingMainAddress = await _context.Addresses
-                                               .Where(a => a.CustomerId == customerId && a.IsMain && a.Id != id)
-                                               .FirstOrDefaultAsync();
+                                                   .Where(a => a.CustomerId == customerId && a.IsMain && a.Id != id)
+                                                   .FirstOrDefaultAsync();
                 if (existingMainAddress != null)
                 {
                     existingMainAddress.IsMain = false;
@@ -105,7 +116,7 @@ namespace Tmm.Controllers
                 }
             }
 
-            _context.Entry(address).State = EntityState.Modified;
+            _context.Entry(existingAddress).State = EntityState.Modified;
 
             try
             {
@@ -115,7 +126,7 @@ namespace Tmm.Controllers
             {
                 if (!_context.Addresses.Any(a => a.Id == id))
                 {
-                    return NotFound();
+                    return NotFound("Address not found.");
                 }
                 else
                 {
@@ -125,6 +136,7 @@ namespace Tmm.Controllers
 
             return NoContent();
         }
+
 
         [HttpDelete]
         [Route("{id}")]

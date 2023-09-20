@@ -20,6 +20,7 @@ namespace Tmm.Data
                 .HasForeignKey(a => a.CustomerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+
             modelBuilder.Entity<Customer>()
                 .HasIndex(c => c.EmailAddress)
                 .IsUnique();

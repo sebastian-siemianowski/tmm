@@ -54,6 +54,15 @@ namespace Tmm.Controllers
                 return Conflict("A customer with the provided email address already exists.");
             }
 
+            if (customer.Addresses != null && customer.Addresses.Any())
+            {
+                foreach (var address in customer.Addresses)
+                {
+                    address.Customer = customer;
+                    address.CustomerId = customer.Id; // Not strictly necessary as EF should handle it
+                }
+            }
+
             _context.Customers.Add(customer);
             await _context.SaveChangesAsync();
 
